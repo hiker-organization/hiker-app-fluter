@@ -1,0 +1,17 @@
+import 'package:app_hiker/src/pages/app/app_shell.dart';
+import 'package:app_hiker/src/pages/app/edit_profile_screen.dart';
+import 'package:app_hiker/src/pages/auth/auth_gate_screen.dart';
+import 'package:app_hiker/src/pages/auth/forgot_password_screen.dart';
+import 'package:app_hiker/src/pages/auth/login_screen.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+
+class AppModule extends Module {
+  @override
+  void register(ModularContext c) {
+    c.route('/', child: (context, state) => const AuthGateScreen());
+    c.route('/login', child: (context, state) => const LoginScreen());
+    c.route('/forgot-password', child: (context, state) => const ForgotPasswordScreen());
+    c.route('/app', child: (context, state) => const AppShell());
+    c.route('/edit-profile', child: (context, state) => const EditProfileScreen());
+  }
+}

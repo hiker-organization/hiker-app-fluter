@@ -1,0 +1,13 @@
+import 'package:flutter/material.dart';
+
+class Pallete {
+  static const Color primaryColor = Color(0xFFFACC15);
+  static const Color secondaryColor = Color(0xFFF1E6FF);
+  static const Color backgroundColor = Color.fromARGB(255, 44, 43, 44);
+  static const Color backgroundButtonColor = Color.fromARGB(255, 249, 246, 246);
+  static const Color textColor = Color.fromARGB(255, 255, 255, 255);
+  static const Color textDarkColor = Color(0xFF333333);
+  static const Color borderColor = Color(0xFFE0E0E0);
+  static const Color whiteColor = Color(0xFFFFFFFF);
+  static const Color errorColor = Color(0xFFFF0000);
+}
