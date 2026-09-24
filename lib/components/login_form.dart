@@ -5,11 +5,22 @@ class LoginForm extends StatelessWidget {
   final String hintText;
   final bool obscureText;
   final TextEditingController? controller;
+  final TextInputType? keyboardType;
+  final bool readOnly;
+  final VoidCallback? onTap;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+
   const LoginForm({
     super.key,
     required this.hintText,
     this.obscureText = false,
     this.controller,
+    this.keyboardType,
+    this.readOnly = false,
+    this.onTap,
+    this.prefixIcon,
+    this.suffixIcon,
   });
 
   @override
@@ -17,6 +28,9 @@ class LoginForm extends StatelessWidget {
     return ConstrainedBox(constraints: const BoxConstraints(maxWidth: 312),
     child: TextFormField(
       controller: controller,
+      keyboardType: keyboardType,
+      readOnly: readOnly,
+      onTap: onTap,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.all(12),
         enabledBorder: OutlineInputBorder(
@@ -28,6 +42,8 @@ class LoginForm extends StatelessWidget {
           borderSide: const BorderSide(color: Pallete.primaryColor, width: 1.5),
         ),
         hintText: hintText,
+        prefixIcon: prefixIcon,
+        suffixIcon: suffixIcon,
       ),
       obscureText: obscureText,
     ));
