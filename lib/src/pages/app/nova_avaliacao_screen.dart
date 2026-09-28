@@ -145,10 +145,10 @@ class _NovaAvaliacaoScreenState extends State<NovaAvaliacaoScreen> {
   }
 
   String? _validate() {
-    if (_local == null) return 'Escolha o local da trilha.';
+    if (_local == null) return 'Escolha o local da experiência.';
     if (_nota < 1 || _nota > 5) return 'Dê uma nota de 1 a 5 estrelas.';
     final descricao = _descricaoController.text.trim();
-    if (descricao.isEmpty) return 'Conte como foi a trilha.';
+    if (descricao.isEmpty) return 'Conte como foi a sua experiência.';
     if (descricao.length > _maxDescricao) {
       return 'A descrição pode ter no máximo $_maxDescricao caracteres.';
     }
@@ -452,7 +452,7 @@ class _NovaAvaliacaoScreenState extends State<NovaAvaliacaoScreen> {
                 maxLength: _maxDescricao,
                 maxLines: 4,
                 minLines: 3,
-                decoration: _decoration('Como foi a trilha?'),
+                decoration: _decoration('Como foi a sua experiência?'),
               ),
             ),
             _section(
