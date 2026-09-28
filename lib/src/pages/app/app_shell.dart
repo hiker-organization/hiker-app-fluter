@@ -20,15 +20,22 @@ class _AppShellState extends State<AppShell> {
   static const _novaAvaliacaoIndex = 3;
 
   int _currentIndex = 0;
+  int _feedVersion = 0;
   String? _photoUrl;
 
   List<Widget> get _tabs => [
     FeedScreen(
+      key: ValueKey(_feedVersion),
       onNovaAvaliacaoTap: () => setState(() => _currentIndex = _novaAvaliacaoIndex),
     ),
     const TrilhasScreen(),
     const PerfilScreen(),
-    const NovaAvaliacaoScreen(),
+    NovaAvaliacaoScreen(
+      onPublished: () => setState(() {
+        _feedVersion++;
+        _currentIndex = 0;
+      }),
+    ),
     const PesquisaScreen(),
   ];
 

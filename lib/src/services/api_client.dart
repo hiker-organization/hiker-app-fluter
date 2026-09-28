@@ -32,6 +32,22 @@ class ApiClient {
     );
   }
 
+  // files receives a factory because a MultipartFile stream can only be sent once,
+  // and the request is rebuilt when the token has to be refreshed.
+  Future<http.Response> postMultipart(
+    String path, {
+    required Map<String, String> fields,
+    required Future<List<http.MultipartFile>> Function() files,
+  }) {
+    return _authorizedRequest((baseUrl, accessToken) async {
+      final request = http.MultipartRequest('POST', Uri.parse('$baseUrl$path'))
+        ..headers['Authorization'] = 'Bearer $accessToken'
+        ..fields.addAll(fields)
+        ..files.addAll(await files());
+      return http.Response.fromStream(await _client.send(request));
+    });
+  }
+
   Future<http.Response> _authorizedRequest(
     Future<http.Response> Function(String baseUrl, String accessToken) request,
   ) async {

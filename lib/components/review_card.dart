@@ -78,9 +78,9 @@ class _ReviewCardState extends State<ReviewCard> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Pallete.backgroundColor,
+        color: Pallete.surfaceColor,
         borderRadius: BorderRadius.circular(12),
-        // border: Border.all(color: Pallete.borderColor, width: 0.5),
+        border: Border.all(color: Pallete.whiteColor.withAlpha(20)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

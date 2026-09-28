@@ -2,6 +2,16 @@ import 'dart:convert';
 
 import 'package:app_hiker/src/models/review.dart';
 import 'package:app_hiker/src/services/api_client.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+
+class ReviewException implements Exception {
+  final String message;
+  ReviewException(this.message);
+
+  @override
+  String toString() => message;
+}
 
 class ReviewService {
   final ApiClient _apiClient;
@@ -37,5 +47,48 @@ class ReviewService {
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Não foi possível descurtir a review');
     }
+  }
+
+  Future<void> createReview({
+    required String localId,
+    required String local,
+    required String descricao,
+    required int nota,
+    required bool oculto,
+    required List<String> tags,
+    required List<String> fotoPaths,
+  }) async {
+    final response = await _apiClient.postMultipart(
+      '/review',
+      fields: {
+        'local_id': localId,
+        'local': local,
+        'descricao': descricao,
+        'nota': '$nota',
+        'oculto': '$oculto',
+        if (tags.isNotEmpty) 'tags': tags.join(','),
+      },
+      files: () => Future.wait(fotoPaths.map((path) {
+        final isPng = path.toLowerCase().endsWith('.png');
+        return http.MultipartFile.fromPath(
+          'fotos',
+          path,
+          contentType: MediaType('image', isPng ? 'png' : 'jpeg'),
+        );
+      })),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw ReviewException(_extractMessage(response.body, 'Não foi possível publicar a avaliação.'));
+    }
+  }
+
+  String _extractMessage(String responseBody, String fallback) {
+    try {
+      final message = (jsonDecode(responseBody) as Map<String, dynamic>)['message'];
+      if (message is List) return message.join('\n');
+      if (message is String && message.isNotEmpty) return message;
+    } catch (_) {}
+    return fallback;
   }
 }
