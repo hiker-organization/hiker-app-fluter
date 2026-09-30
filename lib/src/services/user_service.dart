@@ -24,6 +24,27 @@ class UserService {
     }
   }
 
+  // Validates the stored session against the API; ApiClient refreshes the token on 401.
+  // Returns false only when the session is known to be invalid. Network failures and
+  // server errors keep the user logged in so an offline start doesn't force a new login.
+  Future<bool> hasValidSession() async {
+    final accessToken = await _storage.read(key: 'access_token');
+    if (accessToken == null) return false;
+
+    try {
+      final response = await _apiClient.get('/user/me').timeout(const Duration(seconds: 5));
+      if (response.statusCode == 401) {
+        await logout();
+        return false;
+      }
+      return true;
+    } on SessionExpiredException {
+      return false;
+    } catch (_) {
+      return true;
+    }
+  }
+
   Future<void> logout() async {
     await _storage.delete(key: 'access_token');
     await _storage.delete(key: 'refresh_token');

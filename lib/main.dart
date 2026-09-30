@@ -3,9 +3,12 @@ import 'package:app_hiker/src/utils/pallete.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  // Kept on screen until AuthGateScreen decides the initial route.
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   await dotenv.load(fileName: '.env');
   runApp(ModularApp(module: AppModule(), child: const AppWidget()));
 }
