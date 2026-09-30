@@ -54,6 +54,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   change_app_package_name: ^1.5.0
+  flutter_launcher_icons: ^0.14.4
   rename_app: ^1.6.6
 
 # For information on the generic Dart part of this file, see the
@@ -98,6 +99,21 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  # Run: dart run flutter_launcher_icons
+  android: true
+  ios: true
+  # Legacy Android (< 8) uses the icon as is, with its rounded corners.
+  image_path: assets/icon/icon.png
+  # Android 8+ adaptive icon: the launcher applies its own mask shape.
+  adaptive_icon_background: "#ffcc00"
+  adaptive_icon_foreground: assets/icon/icon_foreground.png
+  # The foreground PNG already has the safe-zone padding, so no extra inset.
+  adaptive_icon_foreground_inset: 0
+  # iOS rejects transparency and rounds the corners itself.
+  image_path_ios: assets/icon/icon_ios.png
+  remove_alpha_ios: true
 
 flutter_native_splash:
   # This package generates native code to customize Flutter's default white native splash screen
