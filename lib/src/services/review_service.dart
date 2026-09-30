@@ -49,6 +49,20 @@ class ReviewService {
     }
   }
 
+  Future<void> setVisibility(int id, {required bool oculto}) async {
+    final response = await _apiClient.patch('/review/$id/visibility?oculto=$oculto');
+    if (response.statusCode != 200) {
+      throw ReviewException(_extractMessage(response.body, 'Não foi possível alterar a visibilidade.'));
+    }
+  }
+
+  Future<void> deleteReview(int id) async {
+    final response = await _apiClient.delete('/review/$id');
+    if (response.statusCode != 200) {
+      throw ReviewException(_extractMessage(response.body, 'Não foi possível excluir a avaliação.'));
+    }
+  }
+
   Future<void> createReview({
     required String localId,
     required String local,

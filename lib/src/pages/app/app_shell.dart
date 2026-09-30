@@ -29,7 +29,8 @@ class _AppShellState extends State<AppShell> {
       onNovaAvaliacaoTap: () => setState(() => _currentIndex = _novaAvaliacaoIndex),
     ),
     const TrilhasScreen(),
-    const PerfilScreen(),
+    // Rebuilt with the feed so a new review shows up on the profile.
+    PerfilScreen(key: ValueKey(_feedVersion)),
     NovaAvaliacaoScreen(
       onPublished: () => setState(() {
         _feedVersion++;

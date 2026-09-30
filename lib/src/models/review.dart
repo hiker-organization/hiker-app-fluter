@@ -34,6 +34,8 @@ class Review {
   final List<String> tags;
   final bool liked;
   final bool disliked;
+  // Hidden reviews are only returned to their own author.
+  final bool oculto;
 
   Review({
     required this.id,
@@ -48,9 +50,11 @@ class Review {
     required this.tags,
     required this.liked,
     required this.disliked,
+    this.oculto = false,
   });
 
-  factory Review.fromJson(Map<String, dynamic> json) {
+  // Profile endpoints return reviews without "autor", so the profile owner is passed in.
+  factory Review.fromJson(Map<String, dynamic> json, {ReviewAutor? autor}) {
     return Review(
       id: json['id'] as int,
       descricao: json['descricao'] as String,
@@ -59,15 +63,16 @@ class Review {
       qntDislikes: json['qnt_dislikes'] as int,
       nota: json['nota'] as int,
       createdAt: DateTime.parse(json['createdAt'] as String),
-      autor: ReviewAutor.fromJson(json['autor'] as Map<String, dynamic>),
+      autor: autor ?? ReviewAutor.fromJson(json['autor'] as Map<String, dynamic>),
       fotos: (json['fotos'] as List<dynamic>)
           .map((foto) => foto['url'] as String)
           .toList(),
       tags: (json['tags'] as List<dynamic>)
           .map((tag) => tag['tag']['descritivo'] as String)
           .toList(),
-      liked: json['liked'] as bool,
-      disliked: json['disliked'] as bool,
+      liked: json['liked'] as bool? ?? false,
+      disliked: json['disliked'] as bool? ?? false,
+      oculto: json['oculto'] as bool? ?? false,
     );
   }
 }

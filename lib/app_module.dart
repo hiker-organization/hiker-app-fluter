@@ -1,5 +1,6 @@
 import 'package:app_hiker/src/pages/app/app_shell.dart';
 import 'package:app_hiker/src/pages/app/edit_profile_screen.dart';
+import 'package:app_hiker/src/pages/app/user_profile_screen.dart';
 import 'package:app_hiker/src/pages/auth/auth_gate_screen.dart';
 import 'package:app_hiker/src/pages/auth/forgot_password_screen.dart';
 import 'package:app_hiker/src/pages/auth/login_screen.dart';
@@ -15,5 +16,7 @@ class AppModule extends Module {
     c.route('/register', child: (context, state) => const RegisterScreen());
     c.route('/app', child: (context, state) => const AppShell());
     c.route('/edit-profile', child: (context, state) => const EditProfileScreen());
+    // nick without the leading "@", which the API stores as part of the nick.
+    c.route('/user/:nick', child: (context, state) => UserProfileScreen(nick: '@${state.params['nick']}'));
   }
 }

@@ -1,3 +1,4 @@
+import 'package:app_hiker/src/pages/app/profile_view.dart';
 import 'package:flutter/material.dart';
 
 class PerfilScreen extends StatelessWidget {
@@ -5,6 +6,6 @@ class PerfilScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Perfil'));
+    return const SafeArea(child: ProfileView());
   }
 }

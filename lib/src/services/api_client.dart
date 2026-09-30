@@ -32,6 +32,24 @@ class ApiClient {
     );
   }
 
+  Future<http.Response> patch(String path) {
+    return _authorizedRequest(
+      (baseUrl, accessToken) => _client.patch(
+        Uri.parse('$baseUrl$path'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      ),
+    );
+  }
+
+  Future<http.Response> delete(String path) {
+    return _authorizedRequest(
+      (baseUrl, accessToken) => _client.delete(
+        Uri.parse('$baseUrl$path'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      ),
+    );
+  }
+
   // files receives a factory because a MultipartFile stream can only be sent once,
   // and the request is rebuilt when the token has to be refreshed.
   Future<http.Response> postMultipart(

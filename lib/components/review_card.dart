@@ -2,11 +2,23 @@ import 'package:app_hiker/src/models/review.dart';
 import 'package:app_hiker/src/services/review_service.dart';
 import 'package:app_hiker/src/utils/pallete.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 
 class ReviewCard extends StatefulWidget {
   final Review review;
+  // Disabled inside a profile, where the author is the profile itself.
+  final bool autorTappable;
+  // Owner actions; the menu is only shown when they are provided.
+  final VoidCallback? onToggleVisibility;
+  final VoidCallback? onDelete;
 
-  const ReviewCard({super.key, required this.review});
+  const ReviewCard({
+    super.key,
+    required this.review,
+    this.autorTappable = true,
+    this.onToggleVisibility,
+    this.onDelete,
+  });
 
   @override
   State<ReviewCard> createState() => _ReviewCardState();
@@ -70,10 +82,16 @@ class _ReviewCardState extends State<ReviewCard> {
     }
   }
 
+  void _openAutorProfile() {
+    final nick = widget.review.autor.nomeUsuario;
+    context.pushNamed('/user/${nick.replaceFirst('@', '')}');
+  }
+
   @override
   Widget build(BuildContext context) {
     final review = widget.review;
     final hasFotoAutor = review.autor.fotoUrl != null && review.autor.fotoUrl!.isNotEmpty;
+    final hasOwnerActions = widget.onToggleVisibility != null || widget.onDelete != null;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -87,26 +105,36 @@ class _ReviewCardState extends State<ReviewCard> {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundImage: hasFotoAutor
-                    ? NetworkImage(review.autor.fotoUrl!)
-                    : const AssetImage('assets/img/profile.png') as ImageProvider,
-              ),
-              const SizedBox(width: 8),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      review.autor.nomeExibicao,
-                      style: const TextStyle(color: Pallete.whiteColor, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      review.local,
-                      style: const TextStyle(color: Pallete.whiteColor, fontSize: 12),
-                    ),
-                  ],
+                child: InkWell(
+                  onTap: widget.autorTappable ? _openAutorProfile : null,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 16,
+                        backgroundImage: hasFotoAutor
+                            ? NetworkImage(review.autor.fotoUrl!)
+                            : const AssetImage('assets/img/profile.png') as ImageProvider,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              review.autor.nomeExibicao,
+                              style: const TextStyle(color: Pallete.whiteColor, fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              review.local,
+                              style: const TextStyle(color: Pallete.whiteColor, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Row(
@@ -116,8 +144,22 @@ class _ReviewCardState extends State<ReviewCard> {
                   Text('${review.nota}', style: const TextStyle(color: Pallete.whiteColor)),
                 ],
               ),
+              if (hasOwnerActions) _buildOwnerMenu(),
             ],
           ),
+          if (review.oculto) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.visibility_off, size: 14, color: Pallete.whiteColor.withAlpha(160)),
+                const SizedBox(width: 4),
+                Text(
+                  'Oculta · só você vê esta avaliação',
+                  style: TextStyle(color: Pallete.whiteColor.withAlpha(160), fontSize: 12),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 8),
           Text(review.descricao, style: const TextStyle(color: Pallete.whiteColor)),
           const SizedBox(height: 8),
@@ -184,6 +226,29 @@ class _ReviewCardState extends State<ReviewCard> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildOwnerMenu() {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert, color: Pallete.whiteColor, size: 20),
+      color: Pallete.surfaceColor,
+      onSelected: (value) {
+        if (value == 'visibility') widget.onToggleVisibility?.call();
+        if (value == 'delete') widget.onDelete?.call();
+      },
+      itemBuilder: (context) => [
+        if (widget.onToggleVisibility != null)
+          PopupMenuItem(
+            value: 'visibility',
+            child: Text(widget.review.oculto ? 'Tornar visível' : 'Ocultar avaliação'),
+          ),
+        if (widget.onDelete != null)
+          const PopupMenuItem(
+            value: 'delete',
+            child: Text('Excluir', style: TextStyle(color: Pallete.errorColor)),
+          ),
+      ],
     );
   }
 }
