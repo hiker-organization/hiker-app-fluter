@@ -23,20 +23,22 @@ class ApiClient {
     );
   }
 
-  Future<http.Response> post(String path) {
+  Future<http.Response> post(String path, {Map<String, dynamic>? body}) {
     return _authorizedRequest(
       (baseUrl, accessToken) => _client.post(
         Uri.parse('$baseUrl$path'),
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: _headers(accessToken, hasBody: body != null),
+        body: body != null ? jsonEncode(body) : null,
       ),
     );
   }
 
-  Future<http.Response> patch(String path) {
+  Future<http.Response> patch(String path, {Map<String, dynamic>? body}) {
     return _authorizedRequest(
       (baseUrl, accessToken) => _client.patch(
         Uri.parse('$baseUrl$path'),
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: _headers(accessToken, hasBody: body != null),
+        body: body != null ? jsonEncode(body) : null,
       ),
     );
   }
@@ -57,8 +59,30 @@ class ApiClient {
     required Map<String, String> fields,
     required Future<List<http.MultipartFile>> Function() files,
   }) {
+    return _multipart('POST', path, fields: fields, files: files);
+  }
+
+  Future<http.Response> patchMultipart(
+    String path, {
+    required Map<String, String> fields,
+    required Future<List<http.MultipartFile>> Function() files,
+  }) {
+    return _multipart('PATCH', path, fields: fields, files: files);
+  }
+
+  Map<String, String> _headers(String accessToken, {required bool hasBody}) => {
+        'Authorization': 'Bearer $accessToken',
+        if (hasBody) 'Content-Type': 'application/json',
+      };
+
+  Future<http.Response> _multipart(
+    String method,
+    String path, {
+    required Map<String, String> fields,
+    required Future<List<http.MultipartFile>> Function() files,
+  }) {
     return _authorizedRequest((baseUrl, accessToken) async {
-      final request = http.MultipartRequest('POST', Uri.parse('$baseUrl$path'))
+      final request = http.MultipartRequest(method, Uri.parse('$baseUrl$path'))
         ..headers['Authorization'] = 'Bearer $accessToken'
         ..fields.addAll(fields)
         ..files.addAll(await files());

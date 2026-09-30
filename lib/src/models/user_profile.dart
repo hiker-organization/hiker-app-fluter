@@ -6,6 +6,10 @@ class UserProfile {
   final String? fotoUrl;
   final num reputacao;
   final List<Review> reviews;
+  // Private data, only returned by /user/me.
+  final String? email;
+  final DateTime? dataNascimento;
+  final String? numeroCelular;
 
   UserProfile({
     required this.nomeExibicao,
@@ -13,6 +17,9 @@ class UserProfile {
     required this.fotoUrl,
     required this.reputacao,
     required this.reviews,
+    this.email,
+    this.dataNascimento,
+    this.numeroCelular,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -22,6 +29,7 @@ class UserProfile {
         .map((item) => Review.fromJson(item as Map<String, dynamic>, autor: autor))
         .toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final dataNascimento = json['data_nascimento'] as String?;
 
     return UserProfile(
       nomeExibicao: autor.nomeExibicao,
@@ -29,6 +37,9 @@ class UserProfile {
       fotoUrl: autor.fotoUrl,
       reputacao: autor.reputacao,
       reviews: reviews,
+      email: json['email'] as String?,
+      dataNascimento: dataNascimento != null ? DateTime.parse(dataNascimento).toLocal() : null,
+      numeroCelular: json['numero_celular'] as String?,
     );
   }
 }

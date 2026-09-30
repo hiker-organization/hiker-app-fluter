@@ -14,8 +14,10 @@ import 'package:flutter_modular/flutter_modular.dart';
 class ProfileView extends StatefulWidget {
   // null opens the logged user's profile.
   final String? nick;
+  // Called after returning from the edit screen, e.g. to refresh the photo in the footer.
+  final VoidCallback? onProfileEdited;
 
-  const ProfileView({super.key, this.nick});
+  const ProfileView({super.key, this.nick, this.onProfileEdited});
 
   @override
   State<ProfileView> createState() => _ProfileViewState();
@@ -130,6 +132,13 @@ class _ProfileViewState extends State<ProfileView> {
         oculto: oculto,
       );
 
+  Future<void> _openEditProfile() async {
+    await context.pushNamed('/edit-profile');
+    if (!mounted) return;
+    widget.onProfileEdited?.call();
+    await _loadProfile();
+  }
+
   void _showMessage(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
@@ -224,7 +233,7 @@ class _ProfileViewState extends State<ProfileView> {
         if (_isOwn) ...[
           const SizedBox(height: 16),
           OutlinedButton.icon(
-            onPressed: () => context.pushNamed('/edit-profile'),
+            onPressed: _openEditProfile,
             icon: const Icon(Icons.edit, size: 16, color: Pallete.primaryColor),
             label: const Text('Editar perfil', style: TextStyle(color: Pallete.primaryColor)),
             style: OutlinedButton.styleFrom(side: const BorderSide(color: Pallete.primaryColor)),

@@ -3,8 +3,18 @@ import 'dart:convert';
 import 'package:app_hiker/src/models/user_profile.dart';
 import 'package:app_hiker/src/services/api_client.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class UserNotFoundException implements Exception {}
+
+class UserException implements Exception {
+  final String message;
+  UserException(this.message);
+
+  @override
+  String toString() => message;
+}
 
 class UserService {
   final ApiClient _apiClient;
@@ -40,6 +50,71 @@ class UserService {
 
     final body = jsonDecode(response.body) as Map<String, dynamic>;
     return UserProfile.fromJson(body['data'] as Map<String, dynamic>);
+  }
+
+  // Only the provided fields are sent. nomeUsuario goes without "@"; the API adds it.
+  Future<void> updateProfile({
+    String? nomeUsuario,
+    String? nomeExibicao,
+    DateTime? dataNascimento,
+    String? numeroCelular,
+    String? fotoPath,
+  }) async {
+    final response = await _apiClient.patchMultipart(
+      '/user/change-data',
+      fields: {
+        'nome_usuario': ?nomeUsuario,
+        'nome_exibicao': ?nomeExibicao,
+        'numero_celular': ?numeroCelular,
+        if (dataNascimento != null) 'data_nascimento': dataNascimento.toIso8601String(),
+      },
+      files: () async => [
+        if (fotoPath != null)
+          await http.MultipartFile.fromPath(
+            'foto',
+            fotoPath,
+            contentType: MediaType('image', fotoPath.toLowerCase().endsWith('.png') ? 'png' : 'jpeg'),
+          ),
+      ],
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw UserException(_extractMessage(response.body, 'Não foi possível salvar as alterações.'));
+    }
+  }
+
+  // RN17.6: the API sends a code to the current e-mail; the change only applies after confirmEmailChange.
+  Future<void> requestEmailChange(String email) async {
+    final response = await _apiClient.post('/user/change-email', body: {'email': email});
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw UserException(_extractMessage(response.body, 'Não foi possível solicitar a alteração de e-mail.'));
+    }
+  }
+
+  Future<void> confirmEmailChange(String token) async {
+    final response = await _apiClient.post('/user/change-email/confirm', body: {'token': token});
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw UserException(_extractMessage(response.body, 'Código inválido ou expirado.'));
+    }
+  }
+
+  Future<void> changePassword({required String senhaAtual, required String senhaNova}) async {
+    final response = await _apiClient.patch(
+      '/user/change-password',
+      body: {'senha_atual': senhaAtual, 'senha_nova': senhaNova},
+    );
+    if (response.statusCode != 200) {
+      throw UserException(_extractMessage(response.body, 'Não foi possível alterar a senha.'));
+    }
+  }
+
+  String _extractMessage(String responseBody, String fallback) {
+    try {
+      final message = (jsonDecode(responseBody) as Map<String, dynamic>)['message'];
+      if (message is List) return message.join('\n');
+      if (message is String && message.isNotEmpty) return message;
+    } catch (_) {}
+    return fallback;
   }
 
   Future<String?> getMyPhotoUrl() async {

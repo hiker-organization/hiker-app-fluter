@@ -30,7 +30,7 @@ class _AppShellState extends State<AppShell> {
     ),
     const TrilhasScreen(),
     // Rebuilt with the feed so a new review shows up on the profile.
-    PerfilScreen(key: ValueKey(_feedVersion)),
+    PerfilScreen(key: ValueKey(_feedVersion), onProfileEdited: _loadProfilePhoto),
     NovaAvaliacaoScreen(
       onPublished: () => setState(() {
         _feedVersion++;
