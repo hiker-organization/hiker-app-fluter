@@ -1,4 +1,5 @@
 import 'package:app_hiker/components/review_card.dart';
+import 'package:app_hiker/components/user_avatar.dart';
 import 'package:app_hiker/src/models/review.dart';
 import 'package:app_hiker/src/models/user_profile.dart';
 import 'package:app_hiker/src/services/api_client.dart';
@@ -203,17 +204,9 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Widget _buildHeader(UserProfile profile) {
-    final hasFoto = profile.fotoUrl != null && profile.fotoUrl!.isNotEmpty;
-
     return Column(
       children: [
-        CircleAvatar(
-          radius: 48,
-          backgroundColor: Pallete.surfaceColor,
-          backgroundImage: hasFoto
-              ? NetworkImage(profile.fotoUrl!)
-              : const AssetImage('assets/img/profile.png') as ImageProvider,
-        ),
+        UserAvatar(photoUrl: profile.fotoUrl, radius: 48),
         const SizedBox(height: 12),
         Text(
           profile.nomeExibicao,

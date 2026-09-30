@@ -1,3 +1,4 @@
+import 'package:app_hiker/components/user_avatar.dart';
 import 'package:app_hiker/src/utils/pallete.dart';
 import 'package:flutter/material.dart';
 
@@ -55,16 +56,10 @@ class _ProfileIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasPhoto = photoUrl != null && photoUrl!.isNotEmpty;
     return CircleAvatar(
       radius: 32,
       backgroundColor: isActive ? Pallete.primaryColor : Colors.transparent,
-      child: CircleAvatar(
-        radius: 30,
-        backgroundImage: hasPhoto
-            ? NetworkImage(photoUrl!)
-            : const AssetImage('assets/img/profile.png'),
-      ),
+      child: UserAvatar(photoUrl: photoUrl, radius: 30),
     );
   }
 }

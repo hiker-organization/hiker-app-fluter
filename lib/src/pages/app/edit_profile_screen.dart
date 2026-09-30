@@ -4,6 +4,7 @@ import 'package:app_hiker/components/change_email_sheet.dart';
 import 'package:app_hiker/components/change_password_sheet.dart';
 import 'package:app_hiker/components/login_form.dart';
 import 'package:app_hiker/components/submit_button.dart';
+import 'package:app_hiker/components/user_avatar.dart';
 import 'package:app_hiker/src/models/user_profile.dart';
 import 'package:app_hiker/src/services/api_client.dart';
 import 'package:app_hiker/src/services/user_service.dart';
@@ -322,21 +323,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildFoto(UserProfile profile) {
-    final ImageProvider image;
-    if (_foto != null) {
-      image = FileImage(File(_foto!.path));
-    } else if (profile.fotoUrl != null && profile.fotoUrl!.isNotEmpty) {
-      image = NetworkImage(profile.fotoUrl!);
-    } else {
-      image = const AssetImage('assets/img/profile.png');
-    }
-
     return Center(
       child: GestureDetector(
         onTap: _isSaving ? null : _pickFoto,
         child: Stack(
           children: [
-            CircleAvatar(radius: 52, backgroundColor: Pallete.surfaceColor, backgroundImage: image),
+            UserAvatar(
+              photoUrl: profile.fotoUrl,
+              radius: 52,
+              image: _foto != null ? FileImage(File(_foto!.path)) : null,
+            ),
             Positioned(
               right: 0,
               bottom: 0,

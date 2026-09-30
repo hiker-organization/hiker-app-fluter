@@ -1,3 +1,4 @@
+import 'package:app_hiker/components/user_avatar.dart';
 import 'package:app_hiker/src/models/review.dart';
 import 'package:app_hiker/src/services/review_service.dart';
 import 'package:app_hiker/src/utils/pallete.dart';
@@ -90,7 +91,6 @@ class _ReviewCardState extends State<ReviewCard> {
   @override
   Widget build(BuildContext context) {
     final review = widget.review;
-    final hasFotoAutor = review.autor.fotoUrl != null && review.autor.fotoUrl!.isNotEmpty;
     final hasOwnerActions = widget.onToggleVisibility != null || widget.onDelete != null;
 
     return Container(
@@ -111,12 +111,7 @@ class _ReviewCardState extends State<ReviewCard> {
                   borderRadius: BorderRadius.circular(8),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        radius: 16,
-                        backgroundImage: hasFotoAutor
-                            ? NetworkImage(review.autor.fotoUrl!)
-                            : const AssetImage('assets/img/profile.png') as ImageProvider,
-                      ),
+                      UserAvatar(photoUrl: review.autor.fotoUrl, radius: 16),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
