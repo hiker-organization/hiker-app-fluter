@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class Pallete {
   static const Color primaryColor = Color(0xFFFACC15);
+  // Orange of the trail screens buttons in the prototype.
+  static const Color accentColor = Color(0xFFF7931E);
   static const Color secondaryColor = Color(0xFFF1E6FF);
   static const Color backgroundColor = Color.fromARGB(255, 44, 43, 44);
   static const Color surfaceColor = Color.fromARGB(255, 58, 57, 58);

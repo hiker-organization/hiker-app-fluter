@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:app_hiker/src/models/user_profile.dart';
 import 'package:app_hiker/src/services/api_client.dart';
+import 'package:app_hiker/src/services/trail_tracker.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -148,6 +149,8 @@ class UserService {
 
   Future<void> logout() async {
     myNick = null;
+    // The trail in progress is stored on the device and belongs to this user.
+    await TrailTracker.instance.discard();
     await _storage.delete(key: 'access_token');
     await _storage.delete(key: 'refresh_token');
   }

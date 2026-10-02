@@ -1,4 +1,5 @@
 import 'package:app_hiker/app_module.dart';
+import 'package:app_hiker/src/services/trail_tracker.dart';
 import 'package:app_hiker/src/utils/pallete.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -10,6 +11,8 @@ void main() async {
   // Kept on screen until AuthGateScreen decides the initial route.
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   await dotenv.load(fileName: '.env');
+  // Brings back a paused or finished trail that wasn't saved yet.
+  await TrailTracker.instance.restore();
   runApp(ModularApp(module: AppModule(), child: const AppWidget()));
 }
 
