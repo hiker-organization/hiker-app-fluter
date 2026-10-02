@@ -1,3 +1,4 @@
+import 'package:app_hiker/components/rating_stars.dart';
 import 'package:app_hiker/components/trail_map.dart';
 import 'package:app_hiker/components/user_avatar.dart';
 import 'package:app_hiker/src/models/trilha.dart';
@@ -76,9 +77,7 @@ class TrailCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const Icon(Icons.star, color: Pallete.primaryColor, size: 16),
-                  const SizedBox(width: 4),
-                  Text('${trilha.nota}', style: const TextStyle(color: Pallete.whiteColor)),
+                  RatingStars(nota: trilha.nota),
                 ],
               ),
               const SizedBox(height: 10),

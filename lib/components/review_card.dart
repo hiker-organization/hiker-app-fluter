@@ -1,3 +1,4 @@
+import 'package:app_hiker/components/rating_stars.dart';
 import 'package:app_hiker/components/user_avatar.dart';
 import 'package:app_hiker/src/models/review.dart';
 import 'package:app_hiker/src/services/review_service.dart';
@@ -132,13 +133,7 @@ class _ReviewCardState extends State<ReviewCard> {
                   ),
                 ),
               ),
-              Row(
-                children: [
-                  const Icon(Icons.star, color: Pallete.primaryColor, size: 16),
-                  const SizedBox(width: 4),
-                  Text('${review.nota}', style: const TextStyle(color: Pallete.whiteColor)),
-                ],
-              ),
+              RatingStars(nota: review.nota),
               if (hasOwnerActions) _buildOwnerMenu(),
             ],
           ),

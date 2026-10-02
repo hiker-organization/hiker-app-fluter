@@ -1,3 +1,4 @@
+import 'package:app_hiker/components/rating_stars.dart';
 import 'package:app_hiker/src/models/trilha.dart';
 import 'package:app_hiker/src/utils/pallete.dart';
 import 'package:app_hiker/src/utils/trail_format.dart';
@@ -52,16 +53,7 @@ class TrailListTile extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      for (var i = 1; i <= 5; i++)
-                        Icon(
-                          i <= trilha.nota ? Icons.star_rounded : Icons.star_outline_rounded,
-                          size: 12,
-                          color: Pallete.primaryColor,
-                        ),
-                    ],
-                  ),
+                  RatingStars(nota: trilha.nota, size: 12),
                   Text.rich(
                     TextSpan(
                       children: [

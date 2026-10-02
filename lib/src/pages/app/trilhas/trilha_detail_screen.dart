@@ -1,3 +1,4 @@
+import 'package:app_hiker/components/rating_stars.dart';
 import 'package:app_hiker/components/trail_map.dart';
 import 'package:app_hiker/components/user_avatar.dart';
 import 'package:app_hiker/src/models/trilha.dart';
@@ -187,16 +188,7 @@ class _TrilhaDetailScreenState extends State<TrilhaDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(formatTrailDate(trilha.iniciadaEm), style: const TextStyle(fontWeight: FontWeight.bold)),
-                Row(
-                  children: [
-                    for (var i = 1; i <= 5; i++)
-                      Icon(
-                        i <= trilha.nota ? Icons.star_rounded : Icons.star_outline_rounded,
-                        size: 18,
-                        color: Pallete.primaryColor,
-                      ),
-                  ],
-                ),
+                RatingStars(nota: trilha.nota, size: 18),
               ],
             ),
           ],
