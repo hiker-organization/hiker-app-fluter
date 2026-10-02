@@ -1,6 +1,8 @@
 import 'package:app_hiker/components/rating_stars.dart';
 import 'package:app_hiker/components/user_avatar.dart';
+import 'package:app_hiker/src/models/place_info.dart';
 import 'package:app_hiker/src/models/review.dart';
+import 'package:app_hiker/src/services/local_service.dart';
 import 'package:app_hiker/src/services/review_service.dart';
 import 'package:app_hiker/src/utils/pallete.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +12,8 @@ class ReviewCard extends StatefulWidget {
   final Review review;
   // Disabled inside a profile, where the author is the profile itself.
   final bool autorTappable;
+  // Disabled on the place page itself.
+  final bool localTappable;
   // Owner actions; the menu is only shown when they are provided.
   final VoidCallback? onToggleVisibility;
   final VoidCallback? onDelete;
@@ -18,6 +22,7 @@ class ReviewCard extends StatefulWidget {
     super.key,
     required this.review,
     this.autorTappable = true,
+    this.localTappable = true,
     this.onToggleVisibility,
     this.onDelete,
   });
@@ -33,6 +38,22 @@ class _ReviewCardState extends State<ReviewCard> {
   late bool _disliked = widget.review.disliked;
   late int _qntLikes = widget.review.qntLikes;
   late int _qntDislikes = widget.review.qntDislikes;
+  late Future<PlaceInfo?>? _place = _loadPlace();
+
+  Future<PlaceInfo?>? _loadPlace() {
+    final placeId = widget.review.idLocal;
+    return placeId == null ? null : PlaceInfoCache.instance.get(placeId);
+  }
+
+  @override
+  void didUpdateWidget(ReviewCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.review.idLocal != widget.review.idLocal) _place = _loadPlace();
+  }
+
+  void _openLocal() {
+    context.pushNamed('/local/${widget.review.idLocal}');
+  }
 
   Future<void> _handleLike() async {
     if (_liked) return;
@@ -122,10 +143,6 @@ class _ReviewCardState extends State<ReviewCard> {
                               review.autor.nomeExibicao,
                               style: const TextStyle(color: Pallete.whiteColor, fontWeight: FontWeight.bold),
                             ),
-                            Text(
-                              review.local,
-                              style: const TextStyle(color: Pallete.whiteColor, fontSize: 12),
-                            ),
                           ],
                         ),
                       ),
@@ -137,6 +154,8 @@ class _ReviewCardState extends State<ReviewCard> {
               if (hasOwnerActions) _buildOwnerMenu(),
             ],
           ),
+          const SizedBox(height: 6),
+          _buildLocal(),
           if (review.oculto) ...[
             const SizedBox(height: 8),
             Row(
@@ -239,6 +258,58 @@ class _ReviewCardState extends State<ReviewCard> {
             child: Text('Excluir', style: TextStyle(color: Pallete.errorColor)),
           ),
       ],
+    );
+  }
+
+  Widget _buildLocal() {
+    final review = widget.review;
+    final tappable = widget.localTappable && review.idLocal != null;
+
+    return InkWell(
+      onTap: tappable ? _openLocal : null,
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(top: 1),
+              child: Icon(Icons.place, size: 15, color: Pallete.primaryColor),
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    review.local,
+                    style: TextStyle(
+                      color: Pallete.whiteColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      decoration: tappable ? TextDecoration.underline : null,
+                      decorationColor: Pallete.whiteColor.withAlpha(90),
+                    ),
+                  ),
+                  FutureBuilder<PlaceInfo?>(
+                    future: _place,
+                    initialData: review.idLocal == null ? null : PlaceInfoCache.instance.cached(review.idLocal!),
+                    builder: (context, snapshot) {
+                      final localidade = snapshot.data?.localidade ?? '';
+                      if (localidade.isEmpty) return const SizedBox.shrink();
+                      return Text(
+                        localidade,
+                        style: TextStyle(color: Pallete.whiteColor.withAlpha(170), fontSize: 12),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

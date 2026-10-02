@@ -152,6 +152,7 @@ class _ProfileViewState extends State<ProfileView> {
         id: r.id,
         descricao: r.descricao,
         local: r.local,
+        idLocal: r.idLocal,
         qntLikes: r.qntLikes,
         qntDislikes: r.qntDislikes,
         nota: r.nota,

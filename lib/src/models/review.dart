@@ -25,6 +25,8 @@ class Review {
   final int id;
   final String descricao;
   final String local;
+  // Google place id; links the review to the place page.
+  final String? idLocal;
   final int qntLikes;
   final int qntDislikes;
   final int nota;
@@ -41,6 +43,7 @@ class Review {
     required this.id,
     required this.descricao,
     required this.local,
+    this.idLocal,
     required this.qntLikes,
     required this.qntDislikes,
     required this.nota,
@@ -59,6 +62,7 @@ class Review {
       id: json['id'] as int,
       descricao: json['descricao'] as String,
       local: json['local'] as String,
+      idLocal: json['id_local'] as String?,
       qntLikes: json['qnt_likes'] as int,
       qntDislikes: json['qnt_dislikes'] as int,
       nota: json['nota'] as int,

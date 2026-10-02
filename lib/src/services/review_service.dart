@@ -35,6 +35,20 @@ class ReviewService {
         .toList();
   }
 
+  Future<List<Review>> getLocalReviews(String placeId) async {
+    final response = await _apiClient.get('/review/local/${Uri.encodeComponent(placeId)}');
+
+    if (response.statusCode == 404) return [];
+    if (response.statusCode != 200) {
+      throw Exception('Não foi possível carregar as avaliações do local');
+    }
+
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    return (body['data'] as List<dynamic>)
+        .map((item) => Review.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<void> likeReview(int id) async {
     final response = await _apiClient.post('/review/$id/like');
     if (response.statusCode != 200 && response.statusCode != 201) {
