@@ -133,8 +133,9 @@ class TrailTracker extends ChangeNotifier {
     notifyListeners();
 
     _accelerometerSub = accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval).listen((event) {
-      if (_stepDetector.addSample(event.x, event.y, event.z, event.timestamp)) {
-        steps++;
+      final confirmed = _stepDetector.addSample(event.x, event.y, event.z, event.timestamp);
+      if (confirmed > 0) {
+        steps += confirmed;
         notifyListeners();
         _scheduleSave();
       }
