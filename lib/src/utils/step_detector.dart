@@ -8,10 +8,12 @@ import 'dart:math';
 // it went back below [_lowerThreshold] (hysteresis) and at least [_minStepInterval]
 // after the previous step, which filters out shakes and double peaks.
 class StepDetector {
-  static const _gravityAlpha = 0.9;
+  // Slow enough (~1 s at 50 Hz) to follow only gravity; a faster average followed the
+  // walking oscillation itself and cancelled soft steps.
+  static const _gravityAlpha = 0.98;
   static const _smoothingAlpha = 0.3;
-  static const _upperThreshold = 1.2;
-  static const _lowerThreshold = 0.4;
+  static const _upperThreshold = 0.6;
+  static const _lowerThreshold = 0.2;
   static const _minStepInterval = Duration(milliseconds: 300);
 
   double? _gravity;

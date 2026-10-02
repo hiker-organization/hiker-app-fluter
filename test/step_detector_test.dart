@@ -43,6 +43,22 @@ void main() {
     expect(steps, inInclusiveRange(48, 56));
   });
 
+  test('counts gentle walking', () {
+    // Slow, soft steps (phone in the pocket of someone walking calmly).
+    final steps = _countSteps(seconds: 30, frequency: 1.6, amplitude: 1.2, noise: 0.3);
+    expect(steps, inInclusiveRange(44, 50));
+  });
+
+  test('counts brisk walking', () {
+    final steps = _countSteps(seconds: 30, frequency: 2.4, amplitude: 2, noise: 0.5);
+    expect(steps, inInclusiveRange(68, 74));
+  });
+
+  test('ignores a phone held still in the hand', () {
+    final steps = _countSteps(seconds: 30, frequency: 2, amplitude: 0, noise: 0.5);
+    expect(steps, 0);
+  });
+
   test('ignores a phone lying still', () {
     final steps = _countSteps(seconds: 30, frequency: 2, amplitude: 0, noise: 0.2);
     expect(steps, 0);
