@@ -1,9 +1,12 @@
 import 'package:app_hiker/components/review_card.dart';
+import 'package:app_hiker/components/trail_list_tile.dart';
 import 'package:app_hiker/components/user_avatar.dart';
 import 'package:app_hiker/src/models/review.dart';
+import 'package:app_hiker/src/models/trilha.dart';
 import 'package:app_hiker/src/models/user_profile.dart';
 import 'package:app_hiker/src/services/api_client.dart';
 import 'package:app_hiker/src/services/review_service.dart';
+import 'package:app_hiker/src/services/trilha_service.dart';
 import 'package:app_hiker/src/services/user_service.dart';
 import 'package:app_hiker/src/utils/pallete.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +15,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 // Shared body of the own profile (RF16) and of another user's profile (RF14).
 // Hidden reviews are only listed on the own profile: /user/me returns them, while
 // /user/:nick filters them out on the API, including from the review count.
+// Trails follow the same rule: other users only see the shared ones.
 class ProfileView extends StatefulWidget {
   // null opens the logged user's profile.
   final String? nick;
@@ -27,11 +31,15 @@ class ProfileView extends StatefulWidget {
 class _ProfileViewState extends State<ProfileView> {
   final _userService = UserService();
   final _reviewService = ReviewService();
+  final _trilhaService = TrilhaService();
 
   bool _isLoading = true;
   String? _errorMessage;
   UserProfile? _profile;
   List<Review> _reviews = [];
+  List<Trilha> _trilhas = [];
+  String? _trilhasError;
+  _ProfileTab _tab = _ProfileTab.avaliacoes;
 
   bool get _isOwn => widget.nick == null || widget.nick == UserService.myNick;
 
@@ -48,9 +56,10 @@ class _ProfileViewState extends State<ProfileView> {
     });
 
     try {
-      final profile = _isOwn
-          ? await _userService.getMe()
-          : await _userService.getUserProfile(widget.nick!);
+      final profileFuture = _isOwn ? _userService.getMe() : _userService.getUserProfile(widget.nick!);
+      // Loaded together; Future.wait keeps an error of one from going unhandled.
+      await Future.wait([profileFuture, _loadTrilhas()]);
+      final profile = await profileFuture;
       if (mounted) {
         setState(() {
           _profile = profile;
@@ -66,6 +75,28 @@ class _ProfileViewState extends State<ProfileView> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  // A failure here only affects the trails tab, the profile still opens.
+  Future<void> _loadTrilhas() async {
+    try {
+      final trilhas = _isOwn ? await _trilhaService.getMine() : await _trilhaService.getByUser(widget.nick!);
+      if (mounted) {
+        setState(() {
+          _trilhas = trilhas;
+          _trilhasError = null;
+        });
+      }
+    } on SessionExpiredException {
+      rethrow;
+    } catch (_) {
+      if (mounted) setState(() => _trilhasError = 'Não foi possível carregar as trilhas.');
+    }
+  }
+
+  Future<void> _openTrilha(Trilha trilha) async {
+    await context.pushNamed('/trilha/${trilha.id}');
+    if (mounted) await _loadTrilhas();
   }
 
   Future<void> _toggleVisibility(Review review) async {
@@ -173,31 +204,10 @@ class _ProfileViewState extends State<ProfileView> {
         padding: const EdgeInsets.all(16),
         children: [
           _buildHeader(_profile!),
-          const SizedBox(height: 24),
-          const Text(
-            'Publicações',
-            style: TextStyle(color: Pallete.whiteColor, fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          if (_reviews.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32),
-              child: Text(
-                _isOwn ? 'Você ainda não publicou nenhuma avaliação.' : 'Nenhuma publicação por aqui ainda.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Pallete.whiteColor.withAlpha(160)),
-              ),
-            ),
-          for (final review in _reviews) ...[
-            ReviewCard(
-              key: ValueKey(review.id),
-              review: review,
-              autorTappable: false,
-              onToggleVisibility: _isOwn ? () => _toggleVisibility(review) : null,
-              onDelete: _isOwn ? () => _deleteReview(review) : null,
-            ),
-            const SizedBox(height: 12),
-          ],
+          const SizedBox(height: 20),
+          _buildTabs(),
+          const SizedBox(height: 16),
+          ...(_tab == _ProfileTab.avaliacoes ? _buildReviews() : _buildTrilhas()),
         ],
       ),
     );
@@ -218,7 +228,7 @@ class _ProfileViewState extends State<ProfileView> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildStat('${_reviews.length}', 'Publicações'),
+            _buildStat('${_reviews.length + _trilhas.length}', 'Publicações'),
             const SizedBox(width: 32),
             _buildStat(profile.reputacao.toStringAsFixed(1), 'Reputação'),
           ],
@@ -236,6 +246,96 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
+  // Icon tabs between dividers, as in the prototype.
+  Widget _buildTabs() {
+    final divider = Pallete.whiteColor.withAlpha(30);
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: divider), bottom: BorderSide(color: divider)),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            _buildTab(_ProfileTab.avaliacoes, Icons.rate_review_outlined, 'Avaliações'),
+            VerticalDivider(width: 1, color: divider, indent: 10, endIndent: 10),
+            _buildTab(_ProfileTab.trilhas, Icons.terrain_outlined, 'Trilhas'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTab(_ProfileTab tab, IconData icon, String label) {
+    final selected = _tab == tab;
+    return Expanded(
+      child: Tooltip(
+        message: label,
+        child: InkWell(
+          onTap: () => setState(() => _tab = tab),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: selected ? Pallete.primaryColor : Colors.transparent, width: 2),
+              ),
+            ),
+            child: Icon(icon, color: selected ? Pallete.primaryColor : Pallete.whiteColor.withAlpha(180)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _emptyMessage(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 32),
+      child: Text(text, textAlign: TextAlign.center, style: TextStyle(color: Pallete.whiteColor.withAlpha(160))),
+    );
+  }
+
+  List<Widget> _buildReviews() {
+    if (_reviews.isEmpty) {
+      return [
+        _emptyMessage(_isOwn ? 'Você ainda não publicou nenhuma avaliação.' : 'Nenhuma avaliação por aqui ainda.'),
+      ];
+    }
+    return [
+      for (final review in _reviews) ...[
+        ReviewCard(
+          key: ValueKey(review.id),
+          review: review,
+          autorTappable: false,
+          onToggleVisibility: _isOwn ? () => _toggleVisibility(review) : null,
+          onDelete: _isOwn ? () => _deleteReview(review) : null,
+        ),
+        const SizedBox(height: 12),
+      ],
+    ];
+  }
+
+  List<Widget> _buildTrilhas() {
+    if (_trilhasError != null) {
+      return [
+        Center(child: Text(_trilhasError!, style: const TextStyle(color: Pallete.errorColor))),
+        TextButton(
+          onPressed: _loadTrilhas,
+          child: const Text('Tentar novamente', style: TextStyle(color: Pallete.primaryColor)),
+        ),
+      ];
+    }
+    if (_trilhas.isEmpty) {
+      return [
+        _emptyMessage(_isOwn ? 'Você ainda não registrou nenhuma trilha.' : 'Nenhuma trilha compartilhada ainda.'),
+      ];
+    }
+    return [
+      for (final trilha in _trilhas) ...[
+        TrailListTile(key: ValueKey(trilha.id), trilha: trilha, onTap: () => _openTrilha(trilha)),
+        const SizedBox(height: 10),
+      ],
+    ];
+  }
+
   Widget _buildStat(String value, String label) {
     return Column(
       children: [
@@ -248,3 +348,5 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 }
+
+enum _ProfileTab { avaliacoes, trilhas }

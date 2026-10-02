@@ -23,6 +23,10 @@ class TrilhaService {
   // Shared trails of every user (RF29).
   Future<List<Trilha>> getFeed() => _getList('/trilha/feed', 'Não foi possível carregar as trilhas.');
 
+  // Shared trails of another user, for their profile.
+  Future<List<Trilha>> getByUser(String nick) =>
+      _getList('/trilha/user/${Uri.encodeComponent(nick)}', 'Não foi possível carregar as trilhas.');
+
   Future<Trilha> getById(int id) async {
     final response = await _apiClient.get('/trilha/$id');
     if (response.statusCode == 404) throw TrilhaException('Trilha não encontrada.');

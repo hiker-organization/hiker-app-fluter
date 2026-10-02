@@ -10,9 +10,10 @@ import 'package:flutter/material.dart';
 // RF24/RF25: live counters and the play, pause and stop controls.
 class TrailTrackingView extends StatefulWidget {
   final UserProfile? profile;
+  final int? postsCount;
   final VoidCallback onBack;
 
-  const TrailTrackingView({super.key, required this.profile, required this.onBack});
+  const TrailTrackingView({super.key, required this.profile, this.postsCount, required this.onBack});
 
   @override
   State<TrailTrackingView> createState() => _TrailTrackingViewState();
@@ -85,7 +86,7 @@ class _TrailTrackingViewState extends State<TrailTrackingView> {
 
         return Column(
           children: [
-            ProfileSummaryHeader(profile: widget.profile, onBack: widget.onBack),
+            ProfileSummaryHeader(profile: widget.profile, postsCount: widget.postsCount, onBack: widget.onBack),
             Divider(height: 1, color: Pallete.whiteColor.withAlpha(20)),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),

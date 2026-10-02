@@ -6,13 +6,16 @@ import 'package:flutter/material.dart';
 // Header of the trail screens in the prototype: photo with posts and reputation on the sides.
 class ProfileSummaryHeader extends StatelessWidget {
   final UserProfile? profile;
+  // Reviews plus trails; falls back to the reviews while the trails aren't loaded.
+  final int? postsCount;
   final VoidCallback? onBack;
 
-  const ProfileSummaryHeader({super.key, required this.profile, this.onBack});
+  const ProfileSummaryHeader({super.key, required this.profile, this.postsCount, this.onBack});
 
   @override
   Widget build(BuildContext context) {
     final profile = this.profile;
+    final posts = postsCount ?? profile?.reviews.length;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
@@ -32,7 +35,7 @@ class ProfileSummaryHeader extends StatelessWidget {
           ),
           Row(
             children: [
-              Expanded(child: _stat(profile == null ? '-' : '${profile.reviews.length}', 'Posts')),
+              Expanded(child: _stat(posts == null ? '-' : '$posts', 'Posts')),
               Container(
                 padding: const EdgeInsets.all(3),
                 decoration: const BoxDecoration(color: Pallete.primaryColor, shape: BoxShape.circle),

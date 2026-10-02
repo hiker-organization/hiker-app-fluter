@@ -16,10 +16,11 @@ import 'package:image_picker/image_picker.dart';
 // imagens, labels) before saving it.
 class FinishTrailView extends StatefulWidget {
   final UserProfile? profile;
+  final int? postsCount;
   // Called after the trail is saved or discarded.
   final VoidCallback onClosed;
 
-  const FinishTrailView({super.key, required this.profile, required this.onClosed});
+  const FinishTrailView({super.key, required this.profile, this.postsCount, required this.onClosed});
 
   @override
   State<FinishTrailView> createState() => _FinishTrailViewState();
@@ -212,7 +213,7 @@ class _FinishTrailViewState extends State<FinishTrailView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ProfileSummaryHeader(profile: widget.profile),
+          ProfileSummaryHeader(profile: widget.profile, postsCount: widget.postsCount),
           Divider(height: 1, color: Pallete.whiteColor.withAlpha(20)),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
